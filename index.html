@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Colores Hexadecimales</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-3xl font-bold mb-4">Gestor de Colores Hexadecimales</h1>
+        <textarea id="colorInput" rows="5" class="w-full p-2 border rounded mb-4" placeholder="Pega tus códigos de color hexadecimal aquí, uno por línea"></textarea>
+        <div class="flex justify-between mb-4">
+            <button id="addColorsBtn" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Agregar Colores</button>
+            <button id="copyAllBtn" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Copiar Todos los Colores</button>
+        </div>
+        <div id="colorContainer" class="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
+    </div>
+
+    <script>
+        let displayedColors = [];
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Color copiado al portapapeles: ' + text);
+            }, (err) => {
+                console.error('Error al copiar: ', err);
+            });
+        }
+
+        function updateColorDisplay() {
+            const container = document.getElementById('colorContainer');
+            container.innerHTML = '';
+            displayedColors.forEach((color, index) => {
+                const colorBox = document.createElement('div');
+                colorBox.className = 'relative h-40 rounded flex flex-col items-center justify-end p-2';
+                colorBox.style.backgroundColor = color;
+                
+                const colorCode = document.createElement('span');
+                colorCode.className = 'bg-white px-2 py-1 rounded text-sm mb-2';
+                colorCode.textContent = color;
+                
+                const buttonContainer = document.createElement('div');
+                buttonContainer.className = 'flex space-x-2 mb-2';
+                
+                const copyButton = document.createElement('button');
+                copyButton.className = 'bg-white text-black px-2 py-1 rounded text-sm hover:bg-gray-200';
+                copyButton.textContent = 'Copiar';
+                copyButton.onclick = () => copyToClipboard(color);
+                
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600';
+                deleteButton.textContent = 'Eliminar';
+                deleteButton.onclick = () => {
+                    displayedColors.splice(index, 1);
+                    updateColorDisplay();
+                };
+                
+                buttonContainer.appendChild(copyButton);
+                buttonContainer.appendChild(deleteButton);
+                colorBox.appendChild(colorCode);
+                colorBox.appendChild(buttonContainer);
+                container.appendChild(colorBox);
+            });
+        }
+
+        document.getElementById('addColorsBtn').addEventListener('click', function() {
+            const input = document.getElementById('colorInput');
+            const newColors = input.value.split('\n').map(color => color.trim()).filter(color => /^#?[0-9A-Fa-f]{6}$/.test(color));
+            displayedColors = [...displayedColors, ...newColors.map(color => color.startsWith('#') ? color : `#${color}`)];
+            updateColorDisplay();
+            input.value = ''; // Limpiar el textarea después de agregar colores
+        });
+
+        document.getElementById('copyAllBtn').addEventListener('click', function() {
+            const allColors = displayedColors.join('\n');
+            copyToClipboard(allColors);
+        });
+    </script>
+</body>
+</html>
